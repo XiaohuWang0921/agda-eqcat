@@ -91,8 +91,17 @@ record Category (o œ m ℓ : Level) : Set (suc (o ⊔ œ ⊔ m ⊔ ℓ)) where
   _≈_ : Rel (A ⇒ B) ℓ
   _≈_ = _≈₁_ on arr
 
+  equiv : IsEquivalence (_≈_ {A} {B})
+  equiv = record { refl = refl ; sym = sym ; trans = trans }
+    where open Eqv₁
+
+  module Eqv {A B} = IsEquivalence (equiv {A} {B})
+
   id : A ⇒ A
   id {A} = ide A w/ src-ide & trgt-ide
+
+  ∘-cong : (_∘_ {B} {C} {A}) Preserves₂ _≈_ ⟶ _≈_ ⟶ _≈_
+  ∘-cong {_} {_} {_} {f w/ sf & tf} {h w/ sh & th} {g w/ sg & tg} {i w/ si & ti} f≈h g≈i = comp-cong f≈h g≈i (Eqv₀.trans sf (Eqv₀.sym tg)) (Eqv₀.trans sh (Eqv₀.sym ti))
 
   op : Category o œ m ℓ
   op = record
@@ -124,3 +133,12 @@ record Category (o œ m ℓ : Level) : Set (suc (o ⊔ œ ⊔ m ⊔ ℓ)) where
         ; identityˡ = Eqv₁.trans (comp-cpt-irr (Eqv₀.sym (Eqv₀.sym src-ide)) src-ide) identityʳ
         ; identityʳ = identityˡ
         }
+
+  obj-setoid : Setoid o œ
+  obj-setoid = record { Carrier = Obj ; _≈_ = _≈₀_ ; isEquivalence = equiv₀ }
+
+  arr-setoid : Setoid m ℓ
+  arr-setoid = record { Carrier = Arr ; _≈_ = _≈₁_ ; isEquivalence = equiv₁ }
+
+  hom-setoid : Obj → Obj → Setoid (m ⊔ œ) ℓ
+  hom-setoid A B = record { Carrier = A ⇒ B ; _≈_ = _≈_ ; isEquivalence = equiv }
