@@ -6,6 +6,7 @@ open import Level
 open import Function.Base using (flip; _on_)
 open import Data.Product.Base using (_,_)
 
+open import Function.Bundles using (Func; _⟶ₛ_; _⟨$⟩_)
 open import Relation.Binary hiding (_⇒_; Irrelevant)
 import Relation.Binary.Reasoning.Setoid as SetoidR
 
@@ -79,7 +80,7 @@ record Category (o œ m ℓ : Level) : Set (suc (o ⊔ œ ⊔ m ⊔ ℓ)) where
     constructor _w/_&_
     field
       arr : Arr
-      domA  : dom  arr ≈₀ A
+      domA : dom arr ≈₀ A
       codB : cod arr ≈₀ B
 
   open _⇒_ public
@@ -142,3 +143,10 @@ record Category (o œ m ℓ : Level) : Set (suc (o ⊔ œ ⊔ m ⊔ ℓ)) where
 
   hom-setoid : Obj → Obj → Setoid (m ⊔ œ) ℓ
   hom-setoid A B = record { Carrier = A ⇒ B ; _≈_ = _≈_ ; isEquivalence = equiv }
+
+  dom-func cod-func : arr-setoid ⟶ₛ obj-setoid
+  dom-func = record { to = dom ; cong = dom-cong }
+  cod-func = record { to = cod ; cong = cod-cong }
+
+  ide-func : obj-setoid ⟶ₛ arr-setoid
+  ide-func = record { to = ide ; cong = ide-cong }
