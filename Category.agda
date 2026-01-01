@@ -26,22 +26,22 @@ record Category (o œ m ℓ : Level) : Set (suc (o ⊔ œ ⊔ m ⊔ ℓ)) where
     equiv₁ : IsEquivalence _≈₁_
 
     -- Source & target functions
-    src trgt  : Arr → Obj
-    src-cong  : src  Preserves _≈₁_ ⟶ _≈₀_
-    trgt-cong : trgt Preserves _≈₁_ ⟶ _≈₀_
+    dom cod  : Arr → Obj
+    dom-cong : dom  Preserves _≈₁_ ⟶ _≈₀_
+    cod-cong : cod Preserves _≈₁_ ⟶ _≈₀_
 
   module Eqv₀ = IsEquivalence equiv₀
   module Eqv₁ = IsEquivalence equiv₁
 
   -- Composable pairs
   Compat : Rel Arr œ
-  Compat f g = src f ≈₀ trgt g
+  Compat f g = dom f ≈₀ cod g
 
   Compat-respˡ-≈ : Compat Respectsˡ _≈₁_
-  Compat-respˡ-≈ f = Eqv₀.trans (Eqv₀.sym (src-cong f))
+  Compat-respˡ-≈ f = Eqv₀.trans (Eqv₀.sym (dom-cong f))
 
   Compat-respʳ-≈ : Compat Respectsʳ _≈₁_
-  Compat-respʳ-≈ f = flip Eqv₀.trans (trgt-cong f)
+  Compat-respʳ-≈ f = flip Eqv₀.trans (cod-cong f)
 
   Compat-resp-≈ : Compat Respects₂ _≈₁_
   Compat-resp-≈ = Compat-respʳ-≈ , Compat-respˡ-≈
@@ -50,21 +50,21 @@ record Category (o œ m ℓ : Level) : Set (suc (o ⊔ œ ⊔ m ⊔ ℓ)) where
     -- Composition
     comp : ∀ f g → Compat f g → Arr
     comp-cong : ∀ {f g h i} (f≈h : f ≈₁ h) (g≈i : g ≈₁ i) (fg-cpt : Compat f g) (hi-cpt : Compat h i) → comp f g fg-cpt ≈₁ comp h i hi-cpt
-    src-comp  : ∀ {f g c} → src  (comp f g c) ≈₀ src  g
-    trgt-comp : ∀ {f g c} → trgt (comp f g c) ≈₀ trgt f
+    dom-comp : ∀ {f g c} → dom (comp f g c) ≈₀ dom  g
+    cod-comp : ∀ {f g c} → cod (comp f g c) ≈₀ cod f
 
     -- Associativity
-    assoc : ∀ {f g h} (fg-cpt : Compat f g) (gh-cpt : Compat g h) → comp (comp f g fg-cpt) h (Eqv₀.trans src-comp gh-cpt) ≈₁ comp f (comp g h gh-cpt) (Eqv₀.trans fg-cpt (Eqv₀.sym trgt-comp))
+    assoc : ∀ {f g h} (fg-cpt : Compat f g) (gh-cpt : Compat g h) → comp (comp f g fg-cpt) h (Eqv₀.trans dom-comp gh-cpt) ≈₁ comp f (comp g h gh-cpt) (Eqv₀.trans fg-cpt (Eqv₀.sym cod-comp))
 
     -- Identity arrows
     ide : Obj → Arr
     ide-cong : ide Preserves _≈₀_ ⟶ _≈₁_
-    src-ide  : ∀ {A} → src  (ide A) ≈₀ A
-    trgt-ide : ∀ {A} → trgt (ide A) ≈₀ A
+    dom-ide : ∀ {A} → dom (ide A) ≈₀ A
+    cod-ide : ∀ {A} → cod (ide A) ≈₀ A
 
     -- Composition with identity
-    identityˡ : ∀ {f} → comp f (ide (src f)) (Eqv₀.sym trgt-ide) ≈₁ f
-    identityʳ : ∀ {f} → comp (ide (trgt f)) f src-ide ≈₁ f
+    identityˡ : ∀ {f} → comp f (ide (dom f)) (Eqv₀.sym cod-ide) ≈₁ f
+    identityʳ : ∀ {f} → comp (ide (cod f)) f dom-ide ≈₁ f
 
   comp-cpt-irr : ∀ {f g} (cpt cpt′ : Compat f g) → comp f g cpt ≈₁ comp f g cpt′
   comp-cpt-irr = comp-cong Eqv₁.refl Eqv₁.refl
@@ -79,14 +79,14 @@ record Category (o œ m ℓ : Level) : Set (suc (o ⊔ œ ⊔ m ⊔ ℓ)) where
     constructor _w/_&_
     field
       arr : Arr
-      srcA  : src  arr ≈₀ A
-      trgtB : trgt arr ≈₀ B
+      domA  : dom  arr ≈₀ A
+      codB : cod arr ≈₀ B
 
   open _⇒_ public
 
   -- Dependent composition
   _∘_ : B ⇒ C → A ⇒ B → A ⇒ C
-  (f w/ sf & tf) ∘ (g w/ sg & tg) = comp f g (Eqv₀.trans sf (Eqv₀.sym tg)) w/ Eqv₀.trans src-comp sg & Eqv₀.trans trgt-comp tf
+  (f w/ sf & tf) ∘ (g w/ sg & tg) = comp f g (Eqv₀.trans sf (Eqv₀.sym tg)) w/ Eqv₀.trans dom-comp sg & Eqv₀.trans cod-comp tf
 
   _≈_ : Rel (A ⇒ B) ℓ
   _≈_ = _≈₁_ on arr
@@ -98,7 +98,7 @@ record Category (o œ m ℓ : Level) : Set (suc (o ⊔ œ ⊔ m ⊔ ℓ)) where
   module Eqv {A B} = IsEquivalence (equiv {A} {B})
 
   id : A ⇒ A
-  id {A} = ide A w/ src-ide & trgt-ide
+  id {A} = ide A w/ dom-ide & cod-ide
 
   ∘-cong : (_∘_ {B} {C} {A}) Preserves₂ _≈_ ⟶ _≈_ ⟶ _≈_
   ∘-cong {_} {_} {_} {f w/ sf & tf} {h w/ sh & th} {g w/ sg & tg} {i w/ si & ti} f≈h g≈i = comp-cong f≈h g≈i (Eqv₀.trans sf (Eqv₀.sym tg)) (Eqv₀.trans sh (Eqv₀.sym ti))
@@ -113,24 +113,24 @@ record Category (o œ m ℓ : Level) : Set (suc (o ⊔ œ ⊔ m ⊔ ℓ)) where
         ; _≈₁_ = _≈₁_
         ; equiv₁ = equiv₁
         
-        ; src = trgt
-        ; trgt = src
-        ; src-cong = trgt-cong
-        ; trgt-cong = src-cong
+        ; dom = cod
+        ; cod = dom
+        ; dom-cong = cod-cong
+        ; cod-cong = dom-cong
         
         ; comp = λ f g eq → comp g f (Eqv₀.sym eq)
         ; comp-cong = λ f≈h g≈i fg-cpt hi-cpt → Eqv₁.sym (comp-cong (Eqv₁.sym g≈i) (Eqv₁.sym f≈h) (Eqv₀.sym hi-cpt) (Eqv₀.sym fg-cpt))
-        ; src-comp = trgt-comp
-        ; trgt-comp = src-comp
+        ; dom-comp = cod-comp
+        ; cod-comp = dom-comp
         
-        ; assoc = λ fg-cpt gh-cpt → Eqv₁.sym (Eqv₁.trans (comp-cpt-irr (Eqv₀.sym (Eqv₀.trans fg-cpt (Eqv₀.sym src-comp))) (Eqv₀.trans src-comp (Eqv₀.sym fg-cpt))) (Eqv₁.trans (assoc (Eqv₀.sym gh-cpt) (Eqv₀.sym fg-cpt)) (comp-cpt-irr (Eqv₀.trans (Eqv₀.sym gh-cpt) (Eqv₀.sym trgt-comp)) (Eqv₀.sym (Eqv₀.trans trgt-comp gh-cpt)))))
+        ; assoc = λ fg-cpt gh-cpt → Eqv₁.sym (Eqv₁.trans (comp-cpt-irr (Eqv₀.sym (Eqv₀.trans fg-cpt (Eqv₀.sym dom-comp))) (Eqv₀.trans dom-comp (Eqv₀.sym fg-cpt))) (Eqv₁.trans (assoc (Eqv₀.sym gh-cpt) (Eqv₀.sym fg-cpt)) (comp-cpt-irr (Eqv₀.trans (Eqv₀.sym gh-cpt) (Eqv₀.sym cod-comp)) (Eqv₀.sym (Eqv₀.trans cod-comp gh-cpt)))))
         
         ; ide = ide
         ; ide-cong = ide-cong
-        ; src-ide = trgt-ide
-        ; trgt-ide = src-ide
+        ; dom-ide = cod-ide
+        ; cod-ide = dom-ide
         
-        ; identityˡ = Eqv₁.trans (comp-cpt-irr (Eqv₀.sym (Eqv₀.sym src-ide)) src-ide) identityʳ
+        ; identityˡ = Eqv₁.trans (comp-cpt-irr (Eqv₀.sym (Eqv₀.sym dom-ide)) dom-ide) identityʳ
         ; identityʳ = identityˡ
         }
 
