@@ -1,6 +1,6 @@
 {-# OPTIONS --without-K --safe #-}
 
-module Category where
+module Categories.Category where
 
 open import Level
 open import Function.Base using (flip; _on_)
