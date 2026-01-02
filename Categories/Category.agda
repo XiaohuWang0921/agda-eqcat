@@ -10,6 +10,8 @@ open import Function.Bundles using (Func; _⟶ₛ_; _⟨$⟩_)
 open import Relation.Binary hiding (_⇒_; Irrelevant)
 import Relation.Binary.Reasoning.Setoid as SetoidR
 
+open import Function.Construct.Setoid
+
 record Category (o œ m ℓ : Level) : Set (suc (o ⊔ œ ⊔ m ⊔ ℓ)) where
   eta-equality
   infix  4 _≈₀_ _≈₁_ _≈_ _⇒_
@@ -104,6 +106,12 @@ record Category (o œ m ℓ : Level) : Set (suc (o ⊔ œ ⊔ m ⊔ ℓ)) where
   ∘-cong : (_∘_ {B} {C} {A}) Preserves₂ _≈_ ⟶ _≈_ ⟶ _≈_
   ∘-cong {_} {_} {_} {f w/ sf & tf} {h w/ sh & th} {g w/ sg & tg} {i w/ si & ti} f≈h g≈i = comp-cong f≈h g≈i (Eqv₀.trans sf (Eqv₀.sym tg)) (Eqv₀.trans sh (Eqv₀.sym ti))
 
+  ∘-congˡ : ∀ h → (flip (_∘_ {B} {C} {A}) h) Preserves _≈_ ⟶ _≈_
+  ∘-congˡ {B} {C} {A} h {f} {g} = flip (∘-cong {B} {C} {A} {f} {g} {h} {h}) (Eqv.refl {A} {B} {h})
+
+  ∘-congʳ : ∀ f → (_∘_ {B} {C} {A} f) Preserves _≈_ ⟶ _≈_
+  ∘-congʳ {B} {C} {A} f {g} {h} = ∘-cong {B} {C} {A} {f} {f} {g} {h} (Eqv.refl {B} {C} {f})
+
   op : Category o œ m ℓ
   op = record
         { Obj = Obj
@@ -143,10 +151,19 @@ record Category (o œ m ℓ : Level) : Set (suc (o ⊔ œ ⊔ m ⊔ ℓ)) where
 
   hom-setoid : Obj → Obj → Setoid (m ⊔ œ) ℓ
   hom-setoid A B = record { Carrier = A ⇒ B ; _≈_ = _≈_ ; isEquivalence = equiv }
-
+  
   dom-func cod-func : arr-setoid ⟶ₛ obj-setoid
   dom-func = record { to = dom ; cong = dom-cong }
   cod-func = record { to = cod ; cong = cod-cong }
 
   ide-func : obj-setoid ⟶ₛ arr-setoid
   ide-func = record { to = ide ; cong = ide-cong }
+
+  comp-func : hom-setoid B C ⟶ₛ hom-setoid A B ⟶ˢ hom-setoid A C
+  comp-func {B} {C} {A} = record
+    { to = λ f → record
+      { to = f ∘_
+      ; cong = λ {g h} → ∘-congʳ {B} {C} {A} f {g} {h}
+      }
+    ; cong = λ {f g} f≈g {h} → ∘-congˡ {B} {C} {A} h {f} {g} f≈g
+    }
