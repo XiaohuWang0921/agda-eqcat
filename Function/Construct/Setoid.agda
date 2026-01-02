@@ -1,7 +1,3 @@
-{-# OPTIONS --without-K --safe #-}
-
--- was not ported from old function hierarchy
-
 module Function.Construct.Setoid where
 
   open import Function.Bundles using (Func; _⟨$⟩_)
@@ -27,7 +23,7 @@ module Function.Construct.Setoid where
     where
       module To = Setoid To
 
-  -- Syntactic sugar for setoid of functions
+  -- Convenient syntax for setoid of functions
   infixr 0 _⟶ˢ_
   _⟶ˢ_ : Setoid a₁ a₂ → Setoid b₁ b₂ → Setoid _ _
   _⟶ˢ_ = setoid
