@@ -39,7 +39,7 @@ record Category (o œ m ℓ : Level) : Set (suc (o ⊔ œ ⊔ m ⊔ ℓ)) where
   Compat f g = dom f ≈₀ cod g
 
   Compat-respˡ-≈ : Compat Respectsˡ _≈₁_
-  Compat-respˡ-≈ f = Eqv₀.trans (Eqv₀.sym (dom-cong f))
+  Compat-respˡ-≈ f = let open Eqv₀ in trans (sym (dom-cong f))
 
   Compat-respʳ-≈ : Compat Respectsʳ _≈₁_
   Compat-respʳ-≈ f = flip Eqv₀.trans (cod-cong f)
@@ -55,7 +55,7 @@ record Category (o œ m ℓ : Level) : Set (suc (o ⊔ œ ⊔ m ⊔ ℓ)) where
     cod-comp : ∀ {f g c} → cod (comp f g c) ≈₀ cod f
 
     -- Associativity
-    assoc : ∀ {f g h} (fg-cpt : Compat f g) (gh-cpt : Compat g h) → comp (comp f g fg-cpt) h (Eqv₀.trans dom-comp gh-cpt) ≈₁ comp f (comp g h gh-cpt) (Eqv₀.trans fg-cpt (Eqv₀.sym cod-comp))
+    assoc : ∀ {f g h} (fg-cpt : Compat f g) (gh-cpt : Compat g h) (open Eqv₀) → comp (comp f g fg-cpt) h (trans dom-comp gh-cpt) ≈₁ comp f (comp g h gh-cpt) (trans fg-cpt (sym cod-comp))
 
     -- Identity arrows
     ide : Obj → Arr
@@ -68,7 +68,7 @@ record Category (o œ m ℓ : Level) : Set (suc (o ⊔ œ ⊔ m ⊔ ℓ)) where
     identityʳ : ∀ {f} → comp (ide (cod f)) f dom-ide ≈₁ f
 
   comp-cpt-irr : ∀ {f g} (cpt cpt′ : Compat f g) → comp f g cpt ≈₁ comp f g cpt′
-  comp-cpt-irr = comp-cong Eqv₁.refl Eqv₁.refl
+  comp-cpt-irr = let open Eqv₁ in comp-cong refl refl
 
   private
     variable
@@ -87,14 +87,13 @@ record Category (o œ m ℓ : Level) : Set (suc (o ⊔ œ ⊔ m ⊔ ℓ)) where
 
   -- Dependent composition
   _∘_ : B ⇒ C → A ⇒ B → A ⇒ C
-  (f w/ sf & tf) ∘ (g w/ sg & tg) = comp f g (Eqv₀.trans sf (Eqv₀.sym tg)) w/ Eqv₀.trans dom-comp sg & Eqv₀.trans cod-comp tf
+  (f w/ sf & tf) ∘ (g w/ sg & tg) = let open Eqv₀ in comp f g (trans sf (sym tg)) w/ trans dom-comp sg & trans cod-comp tf
 
   _≈_ : Rel (A ⇒ B) ℓ
   _≈_ = _≈₁_ on arr
 
   equiv : IsEquivalence (_≈_ {A} {B})
-  equiv = record { refl = refl ; sym = sym ; trans = trans }
-    where open Eqv₁
+  equiv = let open Eqv₁ in record { refl = refl ; sym = sym ; trans = trans }
 
   module Eqv {A B} = IsEquivalence (equiv {A} {B})
 
@@ -102,7 +101,7 @@ record Category (o œ m ℓ : Level) : Set (suc (o ⊔ œ ⊔ m ⊔ ℓ)) where
   id {A} = ide A w/ dom-ide & cod-ide
 
   ∘-cong : (_∘_ {B} {C} {A}) Preserves₂ _≈_ ⟶ _≈_ ⟶ _≈_
-  ∘-cong {_} {_} {_} {f w/ sf & tf} {h w/ sh & th} {g w/ sg & tg} {i w/ si & ti} f≈h g≈i = comp-cong f≈h g≈i (Eqv₀.trans sf (Eqv₀.sym tg)) (Eqv₀.trans sh (Eqv₀.sym ti))
+  ∘-cong {_} {_} {_} {f w/ sf & tf} {h w/ sh & th} {g w/ sg & tg} {i w/ si & ti} f≈h g≈i = let open Eqv₀ in comp-cong f≈h g≈i (trans sf (sym tg)) (trans sh (sym ti))
 
   ∘-congˡ : ∀ h → (flip (_∘_ {B} {C} {A}) h) Preserves _≈_ ⟶ _≈_
   ∘-congˡ {B} {C} {A} h {f} {g} = flip (∘-cong {B} {C} {A} {f} {g} {h} {h}) (Eqv.refl {A} {B} {h})
